@@ -4,3 +4,4 @@
 .Ruserdata
 data
 data_external
+inst/default_data/birth_weight_full.rda
