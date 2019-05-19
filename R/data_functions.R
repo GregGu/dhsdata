@@ -5,14 +5,18 @@ assign_null <- function(...) {
 }
 binfactor <- function(x, ...) {
   x <- as.factor(x)
-  paste0("group", 1:6) %>% map(assign_null)
   nargs <- nargs() - 1
   if(nargs > 6) stop("sorry I got tired and limited this function to 6 groups")
   args <- list(...)
   for(i in 1:nargs){
     assign(paste0("group", i), args[[i]])
   }
-  levels(x) <- list(one = group1, 
+  if( nargs<6){
+  for(i in (nargs+1):6){
+    assign(paste0("group", i), NULL)
+  }
+  }
+  levels(x) <- list(one = group1,
                     two = group2,
                     three = group3,
                     four = group4,

@@ -1,5 +1,5 @@
 library(tidyverse)
-df <- readRDS("/home/greggu/git/dhsdata/inst/default_data/birth_weight_full.rda")
+df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
 df <- df %>% rename(weight = V437,
                     height = V438,
                     scode = V000,
@@ -53,12 +53,12 @@ is.na(df$year) <- which(df$year < 1970)
 # too many eroneous births ...
 df$year_birth <- 1900 + as.integer((df$year_birth-1)/12)
 df$maternal_age <- df$year - df$year_birth
-df$age <- df$age %>% binfactor(c(15:17), 
-                               c(18:34), 
+df$age <- df$age %>% dhsdata:::binfactor(c(15:17),
+                               c(18:34),
                                c(35:49),
                                c(0:14,50:99))
 is.na(df$age) <- which(df$age == 3)
-df$education %>%  binfactor(c(0), 
+df$education %>%  dhsdata:::binfactor(c(0),
                             c(1:3),
                             c(4:9))
 is.na(df$education) <- which(df$education == 2)
@@ -73,9 +73,9 @@ is.na(df$education) <- which(df$education == 2)
 # 21 Tube well or borehole
 # 30 DUG WELL (OPEN/PROTECTED)
 # 31 Protected well
-# 51 Rainwater 
+# 51 Rainwater
 # Unimproved
-# 32 Unprotected well 
+# 32 Unprotected well
 # 40 SURFACE WATER
 # 41 Protected spring
 # 42 Unprotected spring
@@ -87,34 +87,34 @@ is.na(df$education) <- which(df$education == 2)
 # 97 Not a dejure resident
 # (m) 99 Missing
 # previous code
-df$water <- df$water %>% binfactor(c(c(10:31),51), #improved/other impr
+df$water <- df$water %>% dhsdata:::binfactor(c(c(10:31),51), #improved/other impr
                                    c(32:96), #unimproved
                                    c(c(97:99),0:9)) #missing
 is.na(df$water) <- which(df$water == 2)
 # Cooking fuel
 # exclude people who cook outside of the house
-# 95 No food cooked in house         
+# 95 No food cooked in house
 # 97 Not a dejure resident
 # Aggregate 6-10 are solid fuels
 # 1 Electricity
 # 2 LPG
 # 3 Natural gas
-# 4 Biogas 
+# 4 Biogas
 # 5 kerosene
-# 6 Coal, lignite                  
-# 7 Charcoal                              
-# 8 Wood                                 
-# 9 Straw/shrubs/grass                      
-# 10 Agricultural crop 
+# 6 Coal, lignite
+# 7 Charcoal
+# 8 Wood
+# 9 Straw/shrubs/grass
+# 10 Agricultural crop
 # 11 Animal dung
 # possibly remove code 5 kerosene for hard fuel analysis
 # consider adding kerosene as a secondary analysis
-df$fuel1 <- df$fuel %>% binfactor(c(1:4),
+df$fuel1 <- df$fuel %>% dhsdata:::binfactor(c(1:4),
                                   c(6:11),
                                   c(5,91:99,12:90))
 is.na(df$fuel1) <- which(df$fuel1 == 2)
 #solid + other (-kerosene)
-df$fuel2 <- df$fuel %>% binfactor(c(1:4),
+df$fuel2 <- df$fuel %>% dhsdata:::binfactor(c(1:4),
                                   c(6:11,12:90),
                                   c(5,91:99))
 is.na(df$fuel1) <- which(df$fuel1 == 2)
@@ -124,22 +124,22 @@ is.na(df$fuel1) <- which(df$fuel1 == 2)
 # 3  Middle
 # 4  Richer
 # 5  Richest
-df$wealth1 <- df$wealth %>% binfactor(
-  c(1:2), 
+df$wealth1 <- df$wealth %>% dhsdata:::binfactor(
+  c(1:2),
   c(3),
   c(4:5))
 #insurance
-df$insurance <- df$insurance %>% binfactor(0, 
-                                           1, 
+df$insurance <- df$insurance %>% dhsdata:::binfactor(0,
+                                           1,
                                            2:9)
 #firstborn
-df$first_born <- df$first_born %>% binfactor(1, 2:20)
+df$first_born <- df$first_born %>% dhsdata:::binfactor(1, 2:20)
 is.na(df$first_born) <- which(df$first_born == 2)
-df$document <- df$document %>% binfactor(c(0,2), 
-                                         c(1), 
+df$document <- df$document %>% dhsdata:::binfactor(c(0,2),
+                                         c(1),
                                          c(3:9))
 is.na(df$document) <- which(df$document == 2)
-df$birth_weight_f <- df$birth_weight %>% binfactor(0:2500,
+df$birth_weight_f <- df$birth_weight %>% dhsdata:::binfactor(0:2500,
                                                    2501:8000,
                                                    8001:9999)
 is.na(df$birth_weight_f) <- which(df$birth_weight_f == 2)
@@ -149,14 +149,14 @@ is.na(df$birth_weight) <- which(df$birth_weight > 8001)
 
 
 df$scode <- remove_last_digit(df$scode)
-recode <- dhsdata::get_recode()
+recode <- dhsdata:::get_recode()
 df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 
 
 
 # subset/filter data down to our study population
 df <- df %>%
-  subset(alive == 1) 
+  subset(alive == 1)
 df <- df %>%
   subset(twin == 0)
 df <- df %>%
@@ -166,7 +166,7 @@ sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region
 df$sub_region[sub] <- "Caribbean, CA, SA"
 sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
 df$sub_region[sub]<- "Southern + Western Asia"
-df <- df %>% filter(major_area!="Europe") 
+df <- df %>% filter(major_area!="Europe")
 
 
 
