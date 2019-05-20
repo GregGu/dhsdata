@@ -1,0 +1,57 @@
+
+WriteModelbinom <- function(
+  output.dir = getwd(), # to save models and their output in different dirs
+  modelname = "model",
+addarma  = FALSE
+){
+  modelpath <- file.path(output.dir, paste0(modelname,".txt"))
+  cat("model {", 
+      sep="", append=FALSE, file = modelpath, fill=TRUE)
+  
+  # data model
+  cat("
+      for (i in 1:n){
+      y.i[i] ~ dbern(pi.i[i])
+      logit(pi.i[i]) <- a.c[getc.i[i]] + beta1*fuel.i[i] + beta2*insur.i[i] + beta3*edu.i[i] + beta4*age1.i[i] + beta5*age2.i[i] + beta6*wealth1.i[i] + beta7*wealth2.i[i] + beta8*bmi.i[i] + beta9*water.i[i]
+      }
+      ", sep="", append = TRUE, file = modelpath, fill=TRUE)
+  
+  # process model
+  cat("
+      for (c in 1:C){
+      a.c[c] ~ dnorm(a.r[getr.c[c]], tauc_alpha)
+      }
+      
+      for (r in 1:R){
+      a.r[r] ~ dnorm(beta0, taur_alpha)
+      }
+      
+      tauc_alpha <- pow(sigmac_alpha, -2)
+      sigmac_alpha ~ dunif(0,2)
+      
+      taur_alpha <- pow(sigmar_alpha, -2)
+      sigmar_alpha ~ dunif(0,2)
+
+
+      
+      
+      beta0 ~ dnorm(0, 0.01)
+      beta1 ~ dt(0,pow(2.5,-2),1)
+      beta2 ~ dt(0,pow(2.5,-2),1)
+      beta3 ~ dt(0,pow(2.5,-2),1)
+      beta4 ~ dt(0,pow(2.5,-2),1)
+      beta5 ~ dt(0,pow(2.5,-2),1)
+      beta6 ~ dt(0,pow(2.5,-2),1)
+      beta7 ~ dt(0,pow(2.5,-2),1)
+
+      ", sep="", append = TRUE, file = modelpath, fill=TRUE)
+  
+ 
+  
+  cat("  
+  }  #end model
+      ", sep="", append = TRUE, file = modelpath, fill=TRUE)
+  
+  return(modelpath)
+  
+} # end function

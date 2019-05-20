@@ -1,5 +1,8 @@
 library(tidyverse)
+df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
 df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
+
+colnames(df) <- colnames(df) %>% toupper()
 df <- df %>% rename(weight = V437,
                     height = V438,
                     scode = V000,
@@ -14,7 +17,7 @@ df <- df %>% rename(weight = V437,
                     insurance = V481,
                     first_born= `BORD$01`,
                     twin = `B0$01`,
-                    live = `B4$01`,
+                    live = `B5$01`,
                     sex = `B4$01`,
                     document = `M19A$1`,
                     birth_weight = `M19$1`
@@ -58,7 +61,7 @@ df$age <- df$age %>% dhsdata:::binfactor(c(15:17),
                                c(35:49),
                                c(0:14,50:99))
 is.na(df$age) <- which(df$age == 3)
-df$education %>%  dhsdata:::binfactor(c(0),
+df$education <- df$education %>%  dhsdata:::binfactor(c(0),
                             c(1:3),
                             c(4:9))
 is.na(df$education) <- which(df$education == 2)
@@ -148,28 +151,57 @@ is.na(df$birth_weight) <- which(df$birth_weight > 8001)
 
 
 
-df$scode <- remove_last_digit(df$scode)
+df$scode <- dhsdata:::remove_last_digit(df$scode)
 recode <- dhsdata:::get_recode()
 df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 
 
 
 # subset/filter data down to our study population
-df <- df %>%
-  subset(alive == 1)
-df <- df %>%
-  subset(twin == 0)
-df <- df %>%
-  subset(document == 1)
+df <- df[df$live == 1,]
+df <- df[df$twin == 0,]
+df <- df[df$document == 1,]
 
+df$sub_region <- df$sub_region %>% as.character()
 sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
 df$sub_region[sub] <- "Caribbean, CA, SA"
 sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
 df$sub_region[sub]<- "Southern + Western Asia"
-df <- df %>% filter(major_area!="Europe")
+temp <- df %>% filter(major_area!="Europe")
 
+# consider house variable to randomly slect only 1 per house
+# consider maternal_age dist after complete.case
+df1 <- df %>% select(country.code,
+       bmi,
+       age, #replace with maternal_age
+       education,
+       water,
+       fuel1,
+       fuel2,
+       wealth,
+       insurance,
+       birth_weight_f,
+       birth_weight) %>% drop_na()
+df2 <- df %>% select(country.code,
+       bmi,
+       age, #replace with maternal_age
+       education,
+       fuel1,
+       fuel2,
+       wealth,
+       insurance,
+       birth_weight_f,
+       birth_weight) %>% drop_na
+df3 <- df %>% select(country.code,
+       age, #replace with maternal_age
+       education,
+       fuel1,
+       fuel2,
+       wealth,
+       birth_weight_f,
+       birth_weight) %>% drop_na
 
-
-
-
+saveRDS(df1, "inst/default_data/df1.rds")
+saveRDS(df2, "inst/default_data/df2.rds")
+saveRDS(df3, "inst/default_data/df3.rds")
 
