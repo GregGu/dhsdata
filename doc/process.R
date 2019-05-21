@@ -55,16 +55,18 @@ is.na(df$year) <- which(df$year < 1970)
 # CMC format
 # too many eroneous births ...
 df$year_birth <- 1900 + as.integer((df$year_birth-1)/12)
-df$maternal_age <- df$year - df$year_birth
+df$child_age <- df$year - df$year_birth
+df <- df[df$child_age > 0,]
+df$maternal_age <- df$age - df$child_age
 df$age <- df$age %>% dhsdata:::binfactor(c(15:17),
                                c(18:34),
                                c(35:49),
                                c(0:14,50:99))
 is.na(df$age) <- which(df$age == 3)
-df$education <- df$education %>%  dhsdata:::binfactor(c(0),
-                            c(1:3),
-                            c(4:9))
-is.na(df$education) <- which(df$education == 2)
+# df$education <- df$education %>%  dhsdata:::binfactor(c(0),
+#                             c(1:3),
+#                             c(4:9))
+is.na(df$education) <- which(df$education > 3)
 # Drinking Water, UNICEF
 # Improved
 # 10 PIPED WATER
@@ -127,10 +129,10 @@ is.na(df$fuel1) <- which(df$fuel1 == 2)
 # 3  Middle
 # 4  Richer
 # 5  Richest
-df$wealth <- df$wealth %>% dhsdata:::binfactor(
-  c(1:2),
-  c(3),
-  c(4:5))
+# df$wealth <- df$wealth %>% dhsdata:::binfactor(
+#   c(1:2),
+#   c(3),
+#   c(4:5))
 #insurance
 df$insurance <- df$insurance %>% dhsdata:::binfactor(0,
                                            1,
@@ -174,7 +176,7 @@ df <- df %>% filter(major_area!="Europe")
 # consider maternal_age dist after complete.case
 df1 <- df %>% select(country.code,
        bmi,
-       age, #replace with maternal_age
+       maternal_age,
        education,
        water,
        fuel1,
@@ -185,7 +187,7 @@ df1 <- df %>% select(country.code,
        birth_weight) %>% drop_na()
 df2 <- df %>% select(country.code,
        bmi,
-       age, #replace with maternal_age
+       maternal_age,
        education,
        fuel1,
        fuel2,
@@ -194,7 +196,7 @@ df2 <- df %>% select(country.code,
        birth_weight_f,
        birth_weight) %>% drop_na
 df3 <- df %>% select(country.code,
-       age, #replace with maternal_age
+       maternal_age,
        education,
        fuel1,
        fuel2,

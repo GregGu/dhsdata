@@ -1,6 +1,12 @@
 library(tidyverse)
 B <- '01'
 M <- '1'
+# HV241                  Food cooked in the house/ separate building/ ou   89    1    N    I    1    0   No   No
+# 1  In the house
+# 2  In a separate building
+# 3  Outdoors
+# 6  Other
+# We need raphael to request household variables
 cnames0<-c("V000", "V002", "V008",
            "V012", "V106", "V113",
            "V161", "V190", "V437", "V438", "V481")
