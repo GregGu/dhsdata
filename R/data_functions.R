@@ -69,11 +69,10 @@ CreateSingleFile <- function(filenames, data_folder, output_name, file_type) {
       next
     }
     colnames(dat) <- dat %>% colnames() %>% toupper()
-    #dat <- dat[dat$V007 > 2010 | dat$v007 > 2010,] # subset based on year
     assign(name, dat)#, envir = .GlobalEnv)
   }
   data_names <- ls(pattern = 'data[0-600]+') # list all files in environment (since this is called inside a function it is looking in the functions environment)
-  df <- do.call(plyr::rbind.fill, mget(data_names)) # mget gets the named object/s
+  df <- do.call(bind_rows, mget(data_names)) # mget gets the named object/s
   # df <- df[complete.cases(df),]
   # rm(list=paste(data_names, sep="")) # was used to clean GlobalEnv before updating to use function env which is temporary
   if (file_type=="csv") {

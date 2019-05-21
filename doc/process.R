@@ -1,5 +1,5 @@
 library(tidyverse)
-df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
+#df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
 df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
 
 colnames(df) <- colnames(df) %>% toupper()
@@ -127,7 +127,7 @@ is.na(df$fuel1) <- which(df$fuel1 == 2)
 # 3  Middle
 # 4  Richer
 # 5  Richest
-df$wealth1 <- df$wealth %>% dhsdata:::binfactor(
+df$wealth <- df$wealth %>% dhsdata:::binfactor(
   c(1:2),
   c(3),
   c(4:5))
@@ -156,18 +156,19 @@ recode <- dhsdata:::get_recode()
 df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 
 
-
 # subset/filter data down to our study population
-df <- df[df$live == 1,]
-df <- df[df$twin == 0,]
-df <- df[df$document == 1,]
+# df <- df[df$live == 1,]
+# df <- df[df$twin == 0,]
+# df <- df[df$document == 1,]
+df <- df %>% filter(live == 1 & twin == 0 & document == 1)
+
 
 df$sub_region <- df$sub_region %>% as.character()
 sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
 df$sub_region[sub] <- "Caribbean, CA, SA"
 sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
 df$sub_region[sub]<- "Southern + Western Asia"
-temp <- df %>% filter(major_area!="Europe")
+df <- df %>% filter(major_area!="Europe")
 
 # consider house variable to randomly slect only 1 per house
 # consider maternal_age dist after complete.case

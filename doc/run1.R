@@ -39,8 +39,8 @@ jagsdata <- list(y.i = df$birth_weight_f,
                  water.i = df$water,
                  insur.i = df$insurance,
                  edu.i = df$education,
-                 age1.i = as.numeric(df$age_v012<20),
-                 age2.i = as.numeric(df$age_v012>=35),
+                 age1.i = as.numeric(df$age<20),
+                 age2.i = as.numeric(df$age>=35),
                  wealth1.i = as.numeric(df$wealth1==1),
                  wealth2.i = as.numeric(df$wealth1==2),
                  getc.i = getc.i,
@@ -64,6 +64,7 @@ which.max(mod$BUGSoutput$summary[, "Rhat"])
 get_percentiles <- function(par) {
   return(mod$BUGSoutput$summary[par, c("2.5%","50%","97.5%")] %>% exp %>% round(2))
 }
+get_percentiles("beta1")
 pnames <- c("beta1","beta2","beta3", "beta4", "beta5", "beta6", "beta7")
 lapply(pnames, get_percentiles)
 
