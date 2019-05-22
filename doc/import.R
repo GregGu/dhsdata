@@ -7,6 +7,7 @@ M <- '1'
 # 3  Outdoors
 # 6  Other
 # We need raphael to request household variables
+
 cnames0<-c("V000", "V002", "V008",
            "V012", "V106", "V113",
            "V161", "V190", "V437", "V438", "V481")

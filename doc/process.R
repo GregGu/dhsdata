@@ -163,8 +163,9 @@ df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 # df <- df[df$twin == 0,]
 # df <- df[df$document == 1,]
 df <- df %>% filter(live == 1 & twin == 0 & document == 1)
-
-
+#based on cdc the 97th percentile for bw is 4.4kg and 2.4 for 3rd percentile
+# should we create a realistic percentile and remove outliers?
+# 1kg - 5kg?
 df$sub_region <- df$sub_region %>% as.character()
 sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
 df$sub_region[sub] <- "Caribbean, CA, SA"
