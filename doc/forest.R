@@ -11,6 +11,7 @@ abline(v = line, lwd = 2)
 
 library(ggplot2)
 line <- 2500
+pdf("forest.pdf")
 ggplot(df, aes(x =  reorder(country.name, birth_weight, median), y = birth_weight)) +
   geom_boxplot(fill = '#e5e5e5') +
   geom_hline(yintercept=line, show.legend = TRUE) +
@@ -18,7 +19,7 @@ ggplot(df, aes(x =  reorder(country.name, birth_weight, median), y = birth_weigh
   theme_minimal(base_size = 20) +
   theme(legend.position = "none", axis.title.y = element_blank()) #+
   #scale_x_continuous(limits=c(1000, 5000))
-
+dev.off()
 #sample size per country
 temp <- df %>%
   group_by(country.code) %>%

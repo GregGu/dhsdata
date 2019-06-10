@@ -123,6 +123,14 @@ df$fuel2 <- df$fuel %>% dhsdata:::binfactor(c(1:4),
                                   c(6:11,12:90),
                                   c(5,91:99))
 is.na(df$fuel1) <- which(df$fuel1 == 2)
+
+
+df$fuel3 <- df$fuel %>% dhsdata:::binfactor(c(1:4), #clean
+                                            c(6:11), #solid
+                                            c(12:90), #other
+                                            c(5), #kerosene
+                                            c(91:99)) #na
+is.na(df$fuel3) <- which(df$fuel3 == 4)
 # V190: Wealth index
 # 1  Poorest
 # 2  Poorer
@@ -175,13 +183,19 @@ df <- df %>% filter(major_area!="Europe")
 
 # consider house variable to randomly slect only 1 per house
 # consider maternal_age dist after complete.case
+df0 <- df %>% select(country.code,
+                     maternal_age,
+                     education,
+                     fuel3,
+                     wealth,
+                     birth_weight_f,
+                     birth_weight) %>% drop_na
 df1 <- df %>% select(country.code,
        bmi,
        maternal_age,
        education,
        water,
        fuel1,
-       fuel2,
        wealth,
        insurance,
        birth_weight_f,
@@ -191,7 +205,6 @@ df2 <- df %>% select(country.code,
        maternal_age,
        education,
        fuel1,
-       fuel2,
        wealth,
        insurance,
        birth_weight_f,
@@ -200,11 +213,11 @@ df3 <- df %>% select(country.code,
        maternal_age,
        education,
        fuel1,
-       fuel2,
        wealth,
        birth_weight_f,
        birth_weight) %>% drop_na
 
+saveRDS(df0, "inst/default_data/df.rds")
 saveRDS(df1, "inst/default_data/df1.rds")
 saveRDS(df2, "inst/default_data/df2.rds")
 saveRDS(df3, "inst/default_data/df3.rds")
