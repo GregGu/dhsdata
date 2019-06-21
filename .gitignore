@@ -4,6 +4,7 @@
 .Ruserdata
 data
 data_external
+inst/default_data/df.rds
 inst/default_data/birth_weight_full.rda
 data1
 data2
