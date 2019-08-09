@@ -11,14 +11,17 @@ abline(v = line, lwd = 2)
 
 library(ggplot2)
 line <- 2500
-pdf("forest.pdf")
+pdf("forest.pdf", 11,11)
 ggplot(df, aes(x =  reorder(country.name, birth_weight, median), y = birth_weight)) +
-  geom_boxplot(fill = '#e5e5e5') +
-  geom_hline(yintercept=line, show.legend = TRUE) +
+  geom_boxplot(fill = '#e5e5e5', outlier.shape = NA) +
+  geom_hline(yintercept=line, show.legend = TRUE, linetype = 2) +
   coord_flip() +
-  theme_minimal(base_size = 20) +
-  theme(legend.position = "none", axis.title.y = element_blank()) #+
-  #scale_x_continuous(limits=c(1000, 5000))
+  theme_bw(base_size = 15) +
+  theme(panel.border = element_blank()) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  scale_y_continuous(breaks = seq(0,6000,500), limits = c(1000,7000)) +
+  ylab("birth weight")
 dev.off()
 #sample size per country
 temp <- df %>%

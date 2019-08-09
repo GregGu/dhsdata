@@ -8,7 +8,7 @@ df <- df %>% inner_join(temp, by ="country.code")
 
 df$birth_weight_f2 <- as.numeric(df$birth_weight_f == 0)
 df$one <- 1
-temp <- df  %>% group_by(birth_weight_f2, fuel3) %>%
+temp <- df  %>% group_by(.) %>%
   dplyr::summarise(count = sum(one))
 temp <- temp %>%
   group_by(birth_weight_f2) %>%

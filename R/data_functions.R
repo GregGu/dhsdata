@@ -6,13 +6,13 @@ assign_null <- function(...) {
 binfactor <- function(x, ...) {
   x <- as.factor(x)
   nargs <- nargs() - 1
-  if(nargs > 6) stop("sorry I got tired and limited this function to 6 groups")
+  if(nargs > 8) stop("sorry I got tired and limited this function to 8 groups")
   args <- list(...)
   for(i in 1:nargs){
     assign(paste0("group", i), args[[i]])
   }
-  if( nargs<6){
-  for(i in (nargs+1):6){
+  if( nargs<8){
+  for(i in (nargs+1):8){
     assign(paste0("group", i), NULL)
   }
   }
@@ -21,7 +21,9 @@ binfactor <- function(x, ...) {
                     three = group3,
                     four = group4,
                     five = group5,
-                    six = group6)
+                    six = group6,
+                    seven = group7,
+                    eight = group8)
   return(as.numeric(x)-1)
 }
 
