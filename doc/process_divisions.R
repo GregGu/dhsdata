@@ -1,4 +1,4 @@
-
+library(tidyverse)
 
 # area data
 dhs_alpha2 <- read.csv("/home/greggu/git/dhsdata/data_external/dhs_alpha2.csv")
@@ -19,4 +19,5 @@ recode_country <- merge(dhs_alpha2, iso_alpha2, by="country.name")
 recode_country <- merge(recode_country, iso_numeric, by="country.name")
 recode_country <- rename(recode_country, country.code = iso.numeric)
 recode <- merge(recode_country, recode_reg, by="country.code")
+recode <- recode[recode$notes!=" (Ondo State)",] #duplicate nigeria
 saveRDS(recode, "/home/greggu/git/dhsdata/inst/default_data/recode.rds")

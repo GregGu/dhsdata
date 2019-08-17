@@ -1,20 +1,23 @@
 library(tidyverse)
 #df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
-df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
+#df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
+df <- readRDS("/home/greggu/git/dhsdata/data2/data0716.rds")
 
 colnames(df) <- colnames(df) %>% toupper()
 df <- df %>% rename(weight = V437,
                     height = V438,
                     scode = V000,
                     house = V002,
-                    year = V008,
-                    year_birth = `B3$01`,
+                    year = V007,
+                    #year = V008,
+                    year_birth = V010,
+                    #year_birth = `B3$01`,
                     age = V012,
                     education = V106,
                     water = V113,
                     fuel = V161,
                     wealth = V190,
-                    insurance = V481,
+                    #insurance = V481,
                     first_born= `BORD$01`,
                     twin = `B0$01`,
                     live = `B5$01`,

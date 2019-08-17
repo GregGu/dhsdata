@@ -70,6 +70,7 @@ CreateSingleFile <- function(filenames, data_folder, output_name, file_type) {
       print(paste0("something went wrong at index ",i))
       next
     }
+    #dat$`V481` <- NULL
     colnames(dat) <- dat %>% colnames() %>% toupper()
     assign(name, dat)#, envir = .GlobalEnv)
   }
