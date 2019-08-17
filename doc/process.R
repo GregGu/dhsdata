@@ -1,6 +1,6 @@
 library(tidyverse)
 #df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
-#df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full.rda")
+#df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full0.rda")
 df <- readRDS("/home/greggu/git/dhsdata/data2/data0716.rds")
 
 colnames(df) <- colnames(df) %>% toupper()
@@ -10,14 +10,15 @@ df <- df %>% rename(weight = V437,
                     house = V002,
                     year = V007,
                     #year = V008,
-                    year_birth = V010,
+                    #year_birth = V010,
+                    child_age = `HW1$1`,
                     #year_birth = `B3$01`,
                     age = V012,
                     education = V106,
                     water = V113,
                     fuel = V161,
                     wealth = V190,
-                    #insurance = V481,
+                    insurance = V481,
                     first_born= `BORD$01`,
                     twin = `B0$01`,
                     live = `B5$01`,
@@ -25,6 +26,9 @@ df <- df %>% rename(weight = V437,
                     document = `M19A$1`,
                     birth_weight = `M19$1`
 )
+scode <- df$scode
+df <- mutate_all(df, as.numeric)
+df$scode <- scode
 # investigation shows no single survey has different units of measure
 # instead there are simply errors within surveys, outliers with unrealistic weights and heights
 # weight > 200kg | height > 2.15m will be assumed erroneous, they fall past the 99th percentile of respective distributions
@@ -57,15 +61,14 @@ is.na(df$year) <- which(df$year < 1970)
 # Once I found Nepal I checked which year the phase was conducted in
 # CMC format
 # too many eroneous births ...
-df$year_birth <- 1900 + as.integer((df$year_birth-1)/12)
-df$child_age <- df$year - df$year_birth
-df <- df[df$child_age > 0,]
-df$maternal_age <- df$age - df$child_age
-df$age <- df$age %>% dhsdata:::binfactor(c(15:17),
-                               c(18:34),
-                               c(35:49),
-                               c(0:14,50:99))
-is.na(df$age) <- which(df$age == 3)
+# df$year_birth <- 1900 + as.integer((df$year_birth-1)/12)
+# df$child_age <- df$year - df$year_birth
+# df <- df[df$child_age > 0,]
+tempchildage <- df$child_age[!is.na(df$child_age)]
+df$child_age[is.na(df$child_age)] <- median(tempchildage)
+df$maternal_age <- df$age - round(df$child_age/12)
+#hist(df$maternal_age, breaks= 100)
+
 # df$education <- df$education %>%  dhsdata:::binfactor(c(0),
 #                             c(1:3),
 #                             c(4:9))

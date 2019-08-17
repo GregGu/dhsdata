@@ -72,6 +72,7 @@ CreateSingleFile <- function(filenames, data_folder, output_name, file_type) {
     }
     #dat$`V481` <- NULL
     colnames(dat) <- dat %>% colnames() %>% toupper()
+    dat <- mutate_all(dat, as.character)
     assign(name, dat)#, envir = .GlobalEnv)
   }
   data_names <- ls(pattern = 'data[0-600]+') # list all files in environment (since this is called inside a function it is looking in the functions environment)
