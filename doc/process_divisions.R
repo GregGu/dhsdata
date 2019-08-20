@@ -20,4 +20,11 @@ recode_country <- merge(recode_country, iso_numeric, by="country.name")
 recode_country <- rename(recode_country, country.code = iso.numeric)
 recode <- merge(recode_country, recode_reg, by="country.code")
 recode <- recode[recode$notes!=" (Ondo State)",] #duplicate nigeria
+
+recode$sub_region <- recode$sub_region %>% as.character()
+sub <- recode$sub_region=="Central America"|recode$sub_region=="Caribbean"|recode$sub_region=="South America"
+recode$sub_region[sub] <- "Caribbean, CA, SA"
+sub <- recode$sub_region == "Western Asia"|recode$sub_region=="Southern Asia"
+recode$sub_region[sub]<- "Southern + Western Asia"
+recode <- recode %>% filter(major_area!="Europe")
 saveRDS(recode, "/home/greggu/git/dhsdata/inst/default_data/recode.rds")

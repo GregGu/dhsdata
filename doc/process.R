@@ -1,14 +1,14 @@
 library(tidyverse)
 #df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
 #df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full0.rda")
-df <- readRDS("/home/greggu/git/dhsdata/data2/data0716.rds")
+df <- readRDS("/home/greggu/git/dhsdata/data2/data0821.rds")
 
 colnames(df) <- colnames(df) %>% toupper()
 df <- df %>% rename(weight = V437,
                     height = V438,
                     scode = V000,
                     house = V002,
-                    year = V007,
+                    #year = V007,
                     #year = V008,
                     #year_birth = V010,
                     child_age = `HW1$1`,
@@ -27,7 +27,7 @@ df <- df %>% rename(weight = V437,
                     birth_weight = `M19$1`
 )
 scode <- df$scode
-df <- mutate_all(df, as.numeric)
+#df <- mutate_all(df, as.numeric)
 df$scode <- scode
 # investigation shows no single survey has different units of measure
 # instead there are simply errors within surveys, outliers with unrealistic weights and heights
@@ -41,13 +41,13 @@ is.na(df$weight) <- which(df$weight %in% c(200:9999))
 is.na(df$height) <- which(df$height %in% c(2.15:9999))
 df$bmi <- df$weight/((df$height)^2)
 # CMC format
-df$year <- 1900 + as.integer((df$year-1)/12)
-df$year[df$year == 2062] <-2006
-df$year[df$year == 2063] <-2006
-df$year[df$year == 2067] <-2011
-df$year[df$year == 2068] <-2011
-df$year[df$year == 2073] <-2016
-is.na(df$year) <- which(df$year < 1970)
+# df$year <- 1900 + as.integer((df$year-1)/12)
+# df$year[df$year == 2062] <-2006
+# df$year[df$year == 2063] <-2006
+# df$year[df$year == 2067] <-2011
+# df$year[df$year == 2068] <-2011
+# df$year[df$year == 2073] <-2016
+# is.na(df$year) <- which(df$year < 1970)
 # prior investigation in order to hardcode year below
 # unique(df$survey_code_v000[df$year > 2016])
 # unique(df$survey_code_v000[df$year == 2062])
@@ -64,6 +64,7 @@ is.na(df$year) <- which(df$year < 1970)
 # df$year_birth <- 1900 + as.integer((df$year_birth-1)/12)
 # df$child_age <- df$year - df$year_birth
 # df <- df[df$child_age > 0,]
+df$child_age[df$child_age == 99] <- NA
 tempchildage <- df$child_age[!is.na(df$child_age)]
 df$child_age[is.na(df$child_age)] <- median(tempchildage)
 df$maternal_age <- df$age - round(df$child_age/12)
@@ -176,19 +177,29 @@ df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 # df <- df[df$live == 1,]
 # df <- df[df$twin == 0,]
 # df <- df[df$document == 1,]
-df <- df %>% filter(live == 1 & twin == 0 & document == 1)
+df_undoc <- df %>% filter(live == 1 & twin == 0)# & document == 1)
+df <- df_doc <- df %>% filter(live == 1 & twin == 0 & document == 1)
 #based on cdc the 97th percentile for bw is 4.4kg and 2.4 for 3rd percentile
 # should we create a realistic percentile and remove outliers?
 # 1kg - 5kg?
-df$sub_region <- df$sub_region %>% as.character()
-sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
-df$sub_region[sub] <- "Caribbean, CA, SA"
-sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
-df$sub_region[sub]<- "Southern + Western Asia"
-df <- df %>% filter(major_area!="Europe")
+# df$sub_region <- df$sub_region %>% as.character()
+# sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
+# df$sub_region[sub] <- "Caribbean, CA, SA"
+# sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
+# df$sub_region[sub]<- "Southern + Western Asia"
+# df <- df %>% filter(major_area!="Europe")
 
-# consider house variable to randomly slect only 1 per house
-# consider maternal_age dist after complete.case
+
+
+
+# FOR TESTING WITHOUT BAYES MIXED EFFECTS
+# df$age1.i = as.numeric(df$maternal_age<20)
+# df$age2.i = as.numeric(df$maternal_age>=35)
+# fit <- glm(data=df, y.i ~  as.factor(age1.i) + as.factor(age2.i) + as.factor(education) + as.factor(fuel1) +as.factor(wealth), family = "binomial") # + as.factor(region)
+# fit$coefficients
+
+
+
 df0 <- df %>% select(country.code,
                      maternal_age,
                      education,
@@ -227,4 +238,37 @@ saveRDS(df0, "inst/default_data/df.rds")
 saveRDS(df1, "inst/default_data/df1.rds")
 saveRDS(df2, "inst/default_data/df2.rds")
 saveRDS(df3, "inst/default_data/df3.rds")
+
+
+df_doc$wealth[is.na(df_doc$wealth)] <- df3$wealth %>% median
+df_doc$education[is.na(df_doc$education)] <- df3$education %>% median
+df_doc$maternal_age[is.na(df_doc$maternal_age)] <- df3$maternal_age %>% median
+
+df_undoc$wealth[is.na(df_undoc$wealth)] <- df3$wealth %>% median
+df_undoc$education[is.na(df_undoc$education)] <- df3$education %>% median
+df_undoc$maternal_age[is.na(df_undoc$maternal_age)] <- df3$maternal_age %>% median
+
+df_undoc <- df_undoc %>% select(country.code,
+                     maternal_age,
+                     education,
+                     fuel1,
+                     wealth,
+                     birth_weight_f,
+                     birth_weight)
+df_doc <- df_doc %>% select(country.code,
+                            maternal_age,
+                            education,
+                            fuel1,
+                            wealth,
+                            birth_weight_f,
+                            birth_weight)
+
+
+
+df_doc <- df_doc %>% drop_na()
+df_undoc <- df_undoc %>% drop_na()
+
+saveRDS(df_doc, "inst/default_data/df3_impute.rds")
+saveRDS(df_undoc, "inst/default_data/df3_undoc_impute.rds")
+
 

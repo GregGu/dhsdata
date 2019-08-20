@@ -61,8 +61,19 @@ bind_files <- function(filepaths) {
   return(df)
 }
 
+comb_data <- function(filepaths, cnames) {
+  for (i in 1:length(filepaths)) {
+    dat <- tryCatch(data.table::fread(file=filepaths[i], select = cnames), error=function(e) e)
+    if(inherits(dat, "error")){ #check to see if dat is an object of class "error"
+      print(paste0("something went wrong ",i, " file path ", filepaths[i]))
+      next #if the above is TRUE we skip to the next iteration of the loop
+    }
+    colnames(dat) <- toupper(colnames(dat))
+    saveRDS(dat, paste0("data1/",paste0("data_",i), ".rds"))
+  }
+}
 
-CreateSingleFile <- function(filenames, data_folder, output_name, file_type) {
+rbind_data <- function(filenames, data_folder, output_name, file_type) {
   for (i in 1:length(filenames)) {
     name <- paste0("data", i)
     dat <- tryCatch(readRDS(file=filenames[i]), error=function(e) e) # data.table::fread to select specific variables
@@ -70,14 +81,11 @@ CreateSingleFile <- function(filenames, data_folder, output_name, file_type) {
       print(paste0("something went wrong at index ",i))
       next
     }
-    #dat$`V481` <- NULL
-    colnames(dat) <- dat %>% colnames() %>% toupper()
     dat <- mutate_all(dat, as.character)
     assign(name, dat)#, envir = .GlobalEnv)
   }
   data_names <- ls(pattern = 'data[0-600]+') # list all files in environment (since this is called inside a function it is looking in the functions environment)
-  df <- do.call(bind_rows, mget(data_names)) # mget gets the named object/s
-  # df <- df[complete.cases(df),]
+  df <- do.call(plyr::rbind.fill, mget(data_names)) # mget gets the named object/s #rbind VS bind_rows BS rbind.fill
   # rm(list=paste(data_names, sep="")) # was used to clean GlobalEnv before updating to use function env which is temporary
   if (file_type=="csv") {
     write.csv(object = df, file = paste0(data_folder,"/", output_name, ".csv"))

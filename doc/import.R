@@ -7,34 +7,31 @@ M <- '1'
 # 3  Outdoors
 # 6  Other
 # We need raphael to request household variables
-cnames0<-c("V000", "V002", "V007", "V008", "V010",
+cnames0<-c("V000", "V002", #"V007", #"V008", "V010",
            "V012", "V106", "V113",
            "V161", "V190", "V437", "V438", "V481", "HW1$1")
 # THESE VARIABLES HOLD 20 MOST RECENT BIRTHS
-cnames1 <- paste0(c("BORD$","B0$", "B3$","B4$", "B5$"), B)
+cnames1 <- paste0(c("BORD$","B0$","B4$", "B5$"), B) #"B3$"
 # THESE VARIABLES HOLD 6 MOST RECENT BIRTHS
 cnames2 <- paste0(c("M19$", "M19A$") ,M)
 cnames <- c(cnames0,cnames1,cnames2)
 cnames_l <- cnames %>% tolower()
 cnames <- c(cnames, cnames_l)
 filepaths <- dhsdata::get_file_paths(workdir=getwd(), data_folder="data", filetype=".csv") #gets path too microdata survey files
-for (path in filepaths) {
-  df <- read_csv(path)
-  df <- df[,names(df) %in% cnames]
-  saveRDS(df, paste0("data1/",df$V000[1], ".rds"))
-  saveRDS(df, paste0("data1/",df$v000[1], ".rds"))
-}
 
-# check this one JOIR31F for logical columns .... the rds version
-temp <- read_csv("/home/greggu/git/dhsdata/data/AMIR61FL.csv")
-temp <- read_csv(filepaths)
-temp <- temp[,names(temp) %in% cnames]
+# for (path in filepaths) {
+#   df <- read.csv(path)
+#   df <- df[,names(df) %in% cnames]
+#   saveRDS(df, paste0("data1/",df$V000[1], ".rds"))
+#   saveRDS(df, paste0("data1/",df$v000[1], ".rds"))
+# }
+temp <- data.table::fread(file=filepaths[3], select = cnames)
+comb_data(filepaths, cnames)
+dhsdata::get_file_paths(workdir=getwd(), data_folder="data1", filetype=".rds") %>% length()
 
-# idk <- as.character(temp$V481)
-#temp %>% str
 filepaths <- dhsdata::get_file_paths(workdir=getwd(), data_folder="data1", filetype=".rds") #gets path too
 # df <- bind_files(filepaths)
 # saveRDS(df, "data_0519.rds")
 #dhsdata::CreateSingleFile(filepaths, "data2", "data0717", "rds")
 
-CreateSingleFile(filepaths, "data2", "data0716", "rds")
+rbind_data(filepaths, "data2", "data0821", "rds")
