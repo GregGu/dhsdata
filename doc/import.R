@@ -1,3 +1,5 @@
+#df <- read.csv("/home/greggu/git/dhsdata/data/ALIR50FL.csv")
+
 library(tidyverse)
 B <- '01'
 M <- '1'
@@ -7,7 +9,7 @@ M <- '1'
 # 3  Outdoors
 # 6  Other
 # We need raphael to request household variables
-cnames0<-c("V000", "V002", #"V007", #"V008", "V010",
+cnames0<-c("V000", "V001","V002","V004", #"V007", #"V008", "V010",
            "V012", "V106", "V113",
            "V161", "V190", "V437", "V438", "V481", "HW1$1")
 # THESE VARIABLES HOLD 20 MOST RECENT BIRTHS
@@ -25,7 +27,7 @@ filepaths <- dhsdata::get_file_paths(workdir=getwd(), data_folder="data", filety
 #   saveRDS(df, paste0("data1/",df$V000[1], ".rds"))
 #   saveRDS(df, paste0("data1/",df$v000[1], ".rds"))
 # }
-temp <- data.table::fread(file=filepaths[3], select = cnames)
+#temp <- data.table::fread(file=filepaths[3], select = cnames)
 comb_data(filepaths, cnames)
 dhsdata::get_file_paths(workdir=getwd(), data_folder="data1", filetype=".rds") %>% length()
 
@@ -34,4 +36,6 @@ filepaths <- dhsdata::get_file_paths(workdir=getwd(), data_folder="data1", filet
 # saveRDS(df, "data_0519.rds")
 #dhsdata::CreateSingleFile(filepaths, "data2", "data0717", "rds")
 
-rbind_data(filepaths, "data2", "data0821", "rds")
+rbind_data(filepaths, "data2", "data0824", "rds")
+
+temp <- read.csv("/home/greggu/git/dhsdata/data/IAIR52FL.csv")

@@ -1,7 +1,7 @@
 library(tidyverse)
 #df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
 #df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full0.rda")
-df <- readRDS("/home/greggu/git/dhsdata/data2/data0821.rds")
+df <- readRDS("/home/greggu/git/dhsdata/data2/data0824.rds")
 
 colnames(df) <- colnames(df) %>% toupper()
 df <- df %>% rename(weight = V437,
@@ -37,9 +37,13 @@ df$scode <- scode
 # kg/m^2 = BMI
 df$weight <-df$weight / 10 # now in kilograms
 df$height <-df$height / 1000 # now in meters
-is.na(df$weight) <- which(df$weight %in% c(200:9999))
-is.na(df$height) <- which(df$height %in% c(2.15:9999))
+df$weight[df$weight > 200] <- NA
+df$height[df$height > 2.15] <- NA
+
+# is.na(df$weight) <- which(df$weight %in% c(200:9999))
+# is.na(df$height) <- which(df$height %in% c(2.15:9999))
 df$bmi <- df$weight/((df$height)^2)
+df$bmi[df$bmi > 80] <- NA
 # CMC format
 # df$year <- 1900 + as.integer((df$year-1)/12)
 # df$year[df$year == 2062] <-2006
@@ -138,6 +142,11 @@ df$fuel3 <- df$fuel %>% dhsdata:::binfactor(c(1:4), #clean
                                             c(5), #kerosene
                                             c(91:99)) #na
 is.na(df$fuel3) <- which(df$fuel3 == 4)
+df$fuel4 <- df$fuel3
+df$fuel4[df$fuel4 == 2] <- NA
+df$fuel4[df$fuel4 == 1] <- NA
+df$fuelk <- as.numeric(df$fuel4 == 3)
+
 # V190: Wealth index
 # 1  Poorest
 # 2  Poorer
@@ -167,6 +176,8 @@ is.na(df$birth_weight) <- which(df$birth_weight > 8001)
 
 
 
+#1 is male
+df$sex <- as.numeric(df$sex == 1)
 
 df$scode <- dhsdata:::remove_last_digit(df$scode)
 recode <- dhsdata:::get_recode()
@@ -179,53 +190,30 @@ df <- inner_join(df, recode, by=c("scode" = "dhsalpha2"))
 # df <- df[df$document == 1,]
 df_undoc <- df %>% filter(live == 1 & twin == 0)# & document == 1)
 df <- df_doc <- df %>% filter(live == 1 & twin == 0 & document == 1)
-#based on cdc the 97th percentile for bw is 4.4kg and 2.4 for 3rd percentile
-# should we create a realistic percentile and remove outliers?
-# 1kg - 5kg?
-# df$sub_region <- df$sub_region %>% as.character()
-# sub <- df$sub_region=="Central America"|df$sub_region=="Caribbean"|df$sub_region=="South America"
-# df$sub_region[sub] <- "Caribbean, CA, SA"
-# sub <- df$sub_region == "Western Asia"|df$sub_region=="Southern Asia"
-# df$sub_region[sub]<- "Southern + Western Asia"
-# df <- df %>% filter(major_area!="Europe")
 
 
 
 
-# FOR TESTING WITHOUT BAYES MIXED EFFECTS
-# df$age1.i = as.numeric(df$maternal_age<20)
-# df$age2.i = as.numeric(df$maternal_age>=35)
-# fit <- glm(data=df, y.i ~  as.factor(age1.i) + as.factor(age2.i) + as.factor(education) + as.factor(fuel1) +as.factor(wealth), family = "binomial") # + as.factor(region)
-# fit$coefficients
 
 
 
-df0 <- df %>% select(country.code,
-                     maternal_age,
-                     education,
+df_plot <- df_undoc %>% select(country.code,
                      fuel3,
-                     wealth,
                      birth_weight_f,
                      birth_weight) %>% drop_na
+
 df1 <- df %>% select(country.code,
        bmi,
        maternal_age,
        education,
-       water,
        fuel1,
        wealth,
        insurance,
+       sex,
        birth_weight_f,
        birth_weight) %>% drop_na()
-df2 <- df %>% select(country.code,
-       bmi,
-       maternal_age,
-       education,
-       fuel1,
-       wealth,
-       insurance,
-       birth_weight_f,
-       birth_weight) %>% drop_na
+
+
 df3 <- df %>% select(country.code,
        maternal_age,
        education,
@@ -234,41 +222,88 @@ df3 <- df %>% select(country.code,
        birth_weight_f,
        birth_weight) %>% drop_na
 
-saveRDS(df0, "inst/default_data/df.rds")
+saveRDS(df_plot, "inst/default_data/df_plot.rds")
 saveRDS(df1, "inst/default_data/df1.rds")
-saveRDS(df2, "inst/default_data/df2.rds")
 saveRDS(df3, "inst/default_data/df3.rds")
 
 
-df_doc$wealth[is.na(df_doc$wealth)] <- df3$wealth %>% median
-df_doc$education[is.na(df_doc$education)] <- df3$education %>% median
-df_doc$maternal_age[is.na(df_doc$maternal_age)] <- df3$maternal_age %>% median
+impute <- function(maindata, refdata){
+  maindata$wealth[is.na(maindata$wealth)] <- refdata$wealth %>% median
+  maindata$education[is.na(maindata$education)] <- refdata$education %>% median
+  maindata$maternal_age[is.na(maindata$maternal_age)] <- refdata$maternal_age %>% median
+  maindata$bmi[is.na(maindata$bmi)] <- refdata$bmi %>% median
+  maindata$insurance[is.na(maindata$insurance)] <- refdata$insurance %>% median
+  return(maindata)
+}
 
-df_undoc$wealth[is.na(df_undoc$wealth)] <- df3$wealth %>% median
-df_undoc$education[is.na(df_undoc$education)] <- df3$education %>% median
-df_undoc$maternal_age[is.na(df_undoc$maternal_age)] <- df3$maternal_age %>% median
+df_doc_impute <- impute(df_doc, df1)
+df_undoc_impute <- impute(df_undoc, df1)
 
-df_undoc <- df_undoc %>% select(country.code,
+
+
+df_undoc3k <- df_undoc %>% select(country.code,
+                                   bmi,
+                                   maternal_age,
+                                   education,
+                                   fuelk,
+                                   wealth,
+                                   birth_weight_f,
+                                   birth_weight) %>% drop_na()
+
+df_undoc_impute3k <- df_undoc_impute %>% select(country.code,
+                                   bmi,
+                                   maternal_age,
+                                   education,
+                                   fuelk,
+                                   wealth,
+                                   birth_weight_f,
+                                   birth_weight) %>% drop_na()
+
+df_undoc1 <- df_undoc %>% select(country.code,
+                                 bmi,
+                                 maternal_age,
+                                 education,
+                                 fuel1,
+                                 wealth,
+                                 insurance,
+                                 sex,
+                                 birth_weight_f,
+                                 birth_weight) %>% drop_na()
+
+df_undoc3 <- df_undoc %>% select(country.code,
                      maternal_age,
                      education,
                      fuel1,
                      wealth,
                      birth_weight_f,
-                     birth_weight)
-df_doc <- df_doc %>% select(country.code,
-                            maternal_age,
-                            education,
-                            fuel1,
-                            wealth,
-                            birth_weight_f,
-                            birth_weight)
+                     birth_weight) %>% drop_na()
 
 
+df_undoc_impute1 <- df_undoc_impute %>% select(country.code,
+                                               bmi,
+                                               maternal_age,
+                                               education,
+                                               fuel1,
+                                               wealth,
+                                               insurance,
+                                               sex,
+                                               birth_weight_f,
+                                               birth_weight) %>% drop_na()
+df_undoc_impute3 <- df_undoc_impute %>% select(country.code,
+                                maternal_age,
+                                education,
+                                fuel1,
+                                wealth,
+                                birth_weight_f,
+                                birth_weight) %>% drop_na()
 
-df_doc <- df_doc %>% drop_na()
-df_undoc <- df_undoc %>% drop_na()
 
-saveRDS(df_doc, "inst/default_data/df3_impute.rds")
-saveRDS(df_undoc, "inst/default_data/df3_undoc_impute.rds")
+#saveRDS(df_undoc1k, "inst/default_data/df_undoc1k.rds")
+saveRDS(df_undoc3k, "inst/default_data/df_undoc3k.rds")
+saveRDS(df_undoc1, "inst/default_data/df_undoc1.rds")
+saveRDS(df_undoc3, "inst/default_data/df_undoc3.rds")
+saveRDS(df_undoc_impute1, "inst/default_data/df_undoc_impute1.rds")
+saveRDS(df_undoc_impute3, "inst/default_data/df_undoc_impute3.rds")
+saveRDS(df_undoc_impute3k, "inst/default_data/df_undoc_impute3k.rds")
 
 

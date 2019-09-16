@@ -3,6 +3,17 @@
 assign_null <- function(...) {
   assign(..., NULL, env = parent.env(environment()))
 }
+#' binfactor
+#'
+#' @param vector of data to be binned
+#'
+#' @return vector of binned data
+#'
+#' @examples
+#' water_type <- floor(runif(100,1,10))
+#' water_type <- dhsdata:::binfactor(water_type, 1:5, 6:8, 9:10)
+#' # the first vetor corresponds to bin = 0, the second vector corresponds to bin = 1 and so on...
+#'
 binfactor <- function(x, ...) {
   x <- as.factor(x)
   nargs <- nargs() - 1
