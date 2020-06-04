@@ -1,8 +1,8 @@
 library(tidyverse)
 #df <- readRDS("/home/greggu/git/dhsdata/data2/data0519.rds")
 #df <- readRDS("/home/greggu/git/dhsdata/data_external/birth_weight_full0.rda")
-df <- readRDS("/home/greggu/git/dhsdata/data2/data0824.rds")
-
+# df <- readRDS("/home/greggu/git/dhsdata/data2/data0824.rds")
+df <- readRDS("output/plucked_dhs.rds")
 colnames(df) <- colnames(df) %>% toupper()
 df <- df %>% rename(weight = V437,
                     height = V438,

@@ -48,10 +48,10 @@ remove_last_digit <- function(x){
 # test %>% binfactor(c("cat", "dog"), "mouse")
 
 
-get_file_paths <- function(workdir, data_folder, filetype) {
+get_file_paths <- function(path, filetype) {
   # two options to get file names
-  filenames <- list.files(paste0(workdir, "/", data_folder), pattern=paste0("*", filetype))
-  filenames <- paste0(data_folder,"/",filenames) #paste directory onto these names for importation
+  filenames <- list.files(path, pattern=paste0("*", filetype))
+  filenames <- paste0(path,"/",filenames) #paste directory onto these names for importation
   return(filenames)
 }
 
@@ -72,7 +72,8 @@ bind_files <- function(filepaths) {
   return(df)
 }
 
-comb_data <- function(filepaths, cnames) {
+pluck_and_combine_dhs_surveys <- function(filepaths, cnames) {
+  if (!dir.exists("output")) dir.create("output")
   for (i in 1:length(filepaths)) {
     dat <- tryCatch(data.table::fread(file=filepaths[i], select = cnames), error=function(e) e)
     if(inherits(dat, "error")){ #check to see if dat is an object of class "error"
@@ -80,31 +81,14 @@ comb_data <- function(filepaths, cnames) {
       next #if the above is TRUE we skip to the next iteration of the loop
     }
     colnames(dat) <- toupper(colnames(dat))
-    saveRDS(dat, paste0("data1/",paste0("data_",i), ".rds"))
-  }
-}
-
-rbind_data <- function(filenames, data_folder, output_name, file_type) {
-  for (i in 1:length(filenames)) {
-    name <- paste0("data", i)
-    dat <- tryCatch(readRDS(file=filenames[i]), error=function(e) e) # data.table::fread to select specific variables
-    if(inherits(dat, "error")){ # check to see if object 'name' has class error
-      print(paste0("something went wrong at index ",i))
-      next
-    }
     dat <- mutate_all(dat, as.character)
+    name <- paste0("data", i)
     assign(name, dat)#, envir = .GlobalEnv)
   }
   data_names <- ls(pattern = 'data[0-600]+') # list all files in environment (since this is called inside a function it is looking in the functions environment)
   df <- do.call(plyr::rbind.fill, mget(data_names)) # mget gets the named object/s #rbind VS bind_rows BS rbind.fill
-  # rm(list=paste(data_names, sep="")) # was used to clean GlobalEnv before updating to use function env which is temporary
-  if (file_type=="csv") {
-    write.csv(object = df, file = paste0(data_folder,"/", output_name, ".csv"))
-  }
-  if (file_type=="rds") {
-    saveRDS(object = df, file = paste0(data_folder,"/", output_name, ".rds"))
-  }
-} #end function
+  saveRDS(object = df, file = "output/plucked_dhs.rds")
+}
 
 
 
