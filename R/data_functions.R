@@ -71,7 +71,7 @@ bind_files <- function(filepaths) {
   df <- do.call(dplyr::bind_rows, mget(data_names))
   return(df)
 }
-
+#testing
 read_select_rbind <- function(filepaths, cnames) {
   if (!dir.exists("output")) dir.create("output")
   for (i in 1:length(filepaths)) {
