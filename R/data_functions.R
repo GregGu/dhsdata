@@ -72,7 +72,7 @@ bind_files <- function(filepaths) {
   return(df)
 }
 
-pluck_and_combine_dhs_surveys <- function(filepaths, cnames) {
+read_select_rbind <- function(filepaths, cnames) {
   if (!dir.exists("output")) dir.create("output")
   for (i in 1:length(filepaths)) {
     dat <- tryCatch(data.table::fread(file=filepaths[i], select = cnames), error=function(e) e)
@@ -87,7 +87,8 @@ pluck_and_combine_dhs_surveys <- function(filepaths, cnames) {
   }
   data_names <- ls(pattern = 'data[0-600]+') # list all files in environment (since this is called inside a function it is looking in the functions environment)
   df <- do.call(plyr::rbind.fill, mget(data_names)) # mget gets the named object/s #rbind VS bind_rows BS rbind.fill
-  saveRDS(object = df, file = "output/plucked_dhs.rds")
+  saveRDS(object = df, file = "output/combined_raw_dhs.rds")
+  print("dataset saved to /output/combined_raw_dhs.rds")
 }
 
 

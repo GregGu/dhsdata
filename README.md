@@ -10,7 +10,7 @@ outlined below.
 1.  [Select variables](#1)
 2.  [Get the filenames of all surverys](#2) `get_file_paths`
 3.  [Make a single data file with select variabels](#3)
-    `pluck_and_combine_dhs_surveys`
+    `read_select_rbind`
 
 ## 1\. Select variables
 
@@ -63,5 +63,5 @@ The resulting file is automatically saved to the folder named “output”
 which can be found inside your dhsdata folder.
 
 ``` r
-pluck_and_combine_dhs_surveys(filepaths, cnames)
+read_select_rbind(filepaths, cnames)
 ```
